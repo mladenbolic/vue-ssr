@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
+const serialize = require("serialize-javascript");
 const manifest = require(path.join(__dirname, "./dist/ssr-manifest.json"));
-const { renderToString } = require("@vue/server-renderer");
 
 const server = express();
 
@@ -15,17 +15,26 @@ server.use(
 );
 
 const appPath = path.join(__dirname, "./dist", manifest["app.js"]);
-const app = require(appPath).default;
+const renderApp = require(appPath).default;
 
 // handle all routes in our application
 server.get("*", async (req, res) => {
-  const content = await renderToString(app);
+  const { content, state } = await renderApp(req.url);
+
+  const renderState = `
+  <script>
+    window.__INITIAL_STATE__ = ${serialize(state)}
+  </script>`;
 
   const html = `<html>
       <head><title>Vue SSR</title>
+      <link rel="stylesheet" href="${manifest["app.css"]}" />
       </head>
-      <body>${content}</body>
-      </html>`;
+      <body><div id="app"></div></body>
+      </html>`.replace(
+    '<div id="app"></div>',
+    `${renderState}<div id="app">${content}</div>`
+  );
 
   res.setHeader("Content-Type", "text/html");
   res.send(html);

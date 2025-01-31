@@ -4,15 +4,19 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "rm -rf ./dist && npm run build:client && npm run build:server",
+    "build:client": "vue-cli-service build --dest dist/client",
+    "build:server": "SSR=1 vue-cli-service build --dest dist/server",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@unhead/ssr": "^1.11.18",
+    "@unhead/vue": "^1.11.18",
+    "@vue/server-renderer": "^3.5.13",
     "core-js": "^3.8.3",
     "pinia": "^2.3.1",
-    "serialize-javascript": "^6.0.2",
     "vue": "^3.2.13",
-    "vue-router": "^4.0.3"
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -23,6 +27,7 @@
     "@vue/cli-service": "~5.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
+    "serialize-javascript": "^6.0.2",
     "webpack-manifest-plugin": "^5.0.0",
     "webpack-node-externals": "^3.0.0"
   }

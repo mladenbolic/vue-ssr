@@ -1,4 +1,3 @@
-/* eslint-disable */
 import {
   createRouter as createVueRouter,
   createMemoryHistory,

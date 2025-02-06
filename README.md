@@ -17,16 +17,22 @@ npm install
 npm run serve
 ```
 
-### Compiles and minifies client production
+### Compiles and minifies client and server production code
 
 ```
 npm run build
 ```
 
-### Compiles server production code
+### Compiles client-side production code
 
 ```
-SSR=1 npm run build
+npm run build:client
+```
+
+### Compiles server-side production code
+
+```
+npm run build:server
 ```
 
 ### Lints and fixes files

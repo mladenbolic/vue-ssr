@@ -5,11 +5,24 @@ const { defineConfig } = require("@vue/cli-service");
 module.exports = defineConfig({
   transpileDependencies: true,
   chainWebpack: (config) => {
+    config.plugin("define").tap((definitions) => {
+      // https://vuejs.org/api/compile-time-flags
+      Object.assign(definitions[0], {
+        __VUE_OPTIONS_API__: "true",
+        __VUE_PROD_DEVTOOLS__: "true",
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: "true",
+      });
+      return definitions;
+    });
+
     if (!process.env.SSR) {
+      config
+        .plugin("manifest")
+        .use(new WebpackManifestPlugin({ fileName: "client-manifest.json" }));
+
+      config.entry("app").clear().add("./src/main.js");
       return;
     }
-
-    config.entry("app").clear().add("./src/main.server.js");
 
     config.target("node");
     config.output.libraryTarget("commonjs2");
@@ -17,6 +30,8 @@ module.exports = defineConfig({
     config
       .plugin("manifest")
       .use(new WebpackManifestPlugin({ fileName: "ssr-manifest.json" }));
+
+    config.entry("app").clear().add("./src/main.server.js");
 
     config.externals(
       nodeExternals({

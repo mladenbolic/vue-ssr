@@ -1,19 +1,15 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <Counter />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
+  <nav>
+    <router-link to="/">Home</router-link> |
+    <router-link to="/about">About</router-link>
+  </nav>
+  <router-view />
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
-import Counter from "./components/Counter.vue";
-
 export default {
   name: "App",
-  components: {
-    HelloWorld,
-    Counter,
-  },
+  components: {},
 };
 </script>
 

@@ -1,4 +1,4 @@
-import { defineStore, createPinia } from "pinia";
+import { createPinia, defineStore } from "pinia";
 
 export const useCounterStore = defineStore("counter", {
   state: () => ({ count: 0 }),

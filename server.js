@@ -1,14 +1,11 @@
 const express = require("express");
 const path = require("path");
 const serialize = require("serialize-javascript");
+const fs = require("fs");
 
 const manifest = require(path.join(
   __dirname,
   "./dist/server/ssr-manifest.json"
-));
-const clientManifest = require(path.join(
-  __dirname,
-  "./dist/client/client-manifest.json"
 ));
 
 const server = express();
@@ -27,28 +24,37 @@ const renderApp = require(appPath).default;
 
 // handle all urls in our application
 server.get("*", async (req, res) => {
-  const { content, state } = await renderApp(req.url);
+  const { content, state, meta } = await renderApp(req.url);
+
+  const baseUrl = req.protocol + "://" + req.get("host");
+  const fullUrl = baseUrl + req.originalUrl.split(/[?#]/)[0];
 
   const renderState = `
-    <script>
-      window.__INITIAL_STATE__ = ${serialize(state)}
-    </script>`;
+<script>
+  window.__INITIAL_STATE__ = ${serialize(state)}
+</script>`;
 
-  const html = `<html>
-        <head><title>Vue SSR</title>
-        <link rel="stylesheet" href="${clientManifest["app.css"]}" />
-        <script defer="defer" src="${clientManifest["chunk-vendors.js"]}"></script>
-        <script defer="defer" src="${clientManifest["app.js"]}"></script>
-        </head>
-        <body><div id="app"></div>
-        </body>
-        </html>`.replace(
-    '<div id="app"></div>',
-    `${renderState}<div id="app">${content}</div>`
-  );
+  fs.readFile(path.join(__dirname, distPath, "index.html"), (err, html) => {
+    if (err) {
+      throw err;
+    }
 
-  res.setHeader("Content-Type", "text/html");
-  res.send(html);
+    // eslint-disable-next-line no-param-reassign
+    html = html
+      .toString()
+      .replace(
+        '<div id="app"></div>',
+        `${renderState}<div id="app">${content}</div>`
+      )
+      .replace("</head>", `${meta || ""}</head>`)
+      .replace(
+        '<meta property="og:url" content="https://sixhours.io">',
+        `<meta property="og:url" content="${fullUrl}">`
+      )
+      .replace(/content="\/img\//g, `content="${baseUrl}/img/`);
+    res.setHeader("Content-Type", "text/html");
+    res.send(html);
+  });
 });
 
 server.listen(8083);

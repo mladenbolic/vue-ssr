@@ -1,8 +1,10 @@
-import { renderToString } from "@vue/server-renderer";
 import { createSSRApp } from "vue";
+import App from "./App.vue";
+import { renderToString } from "@vue/server-renderer";
+import { renderSSRHead } from "@unhead/ssr";
 import createStore from "./store";
 import createRouter from "./router";
-import App from "./App.vue";
+import { createHead } from "@unhead/vue";
 
 export default async (url) => {
   console.log("url=", url);
@@ -10,9 +12,11 @@ export default async (url) => {
 
   const store = createStore();
   const router = createRouter();
+  const head = createHead();
 
   app.use(store);
   app.use(router);
+  app.use(head);
 
   // set server-side router's location
   // On page refresh router isReady() resolves immediately, but current path is still not
@@ -33,8 +37,10 @@ export default async (url) => {
 
   const context = {};
   const content = await renderToString(app, context);
+  const { headTags: meta } = await renderSSRHead(head);
+
   const state = store.state.value;
 
-  // return application content and state for server side rendering
-  return { content, state };
+  // return application content, state and meta tags for server side rendering
+  return { content, state, meta };
 };

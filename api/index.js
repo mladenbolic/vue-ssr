@@ -5,12 +5,13 @@ const fs = require("fs");
 
 const manifest = require(path.join(
   __dirname,
-  "./dist/server/ssr-manifest.json"
+  "../dist/server/ssr-manifest.json"
 ));
 
 const server = express();
 
-const distPath = "./dist/client";
+const distPath = "../dist/client";
+
 server.use("/img", express.static(path.join(__dirname, distPath, "img")));
 server.use("/js", express.static(path.join(__dirname, distPath, "js")));
 server.use("/css", express.static(path.join(__dirname, distPath, "css")));
@@ -19,11 +20,11 @@ server.use(
   express.static(path.join(__dirname, distPath, "favicon.ico"))
 );
 
-const appPath = path.join(__dirname, "./dist/server", manifest["app.js"]);
+const appPath = path.join(__dirname, "../dist/server", manifest["app.js"]);
 const renderApp = require(appPath).default;
 
 // handle all urls in our application
-server.get("*", async (req, res) => {
+server.get(/(.*)/, async (req, res) => {
   const { content, state, meta } = await renderApp(req.url);
 
   const baseUrl = req.protocol + "://" + req.get("host");
